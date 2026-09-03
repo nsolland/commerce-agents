@@ -24,6 +24,13 @@ from .analysis import PROGRESS_MESSAGE_MAX_CHARS
 from .backend import MerchantBackend
 from .changes import ChangeNotApplicable, GuardrailViolation
 from .config import MerchantAgentConfig
+from .consequence import (
+    CONSEQUENCE_GATE,
+    ConsequenceHeld,
+    ConsequenceResult,
+    DirectMerchantConsequenceAdapter,
+    MerchantConsequenceAdapter,
+)
 from .enrichment import PRESENTATION_COMPONENTS
 from .fencing import MERCHANT_FENCE
 from .gates import (
@@ -116,6 +123,7 @@ class MerchantToolExecutor(BaseToolExecutor):
         delegates: Sequence[DelegateExtension] = (),
         progress: Callable[[AgentEvent], None] | None = None,
         usage: dict[str, int] | None = None,
+        consequence_adapter: MerchantConsequenceAdapter | None = None,
     ) -> None:
         super().__init__(
             backend=backend,
@@ -129,6 +137,7 @@ class MerchantToolExecutor(BaseToolExecutor):
             progress=progress,
             usage=usage,
         )
+        self._consequence_adapter = consequence_adapter or DirectMerchantConsequenceAdapter()
 
     @property
     def memory_subject(self) -> str:
@@ -348,13 +357,30 @@ class MerchantToolExecutor(BaseToolExecutor):
         if held := check_apply_change(self._state, self._config, change_id):
             return held
         try:
-            applied = await self._backend.apply_change(self._session, change_id)
+            result = await self._consequence_adapter.apply(
+                backend=self._backend,
+                session=self._session,
+                change=self._state.seen_changes[change_id],
+            )
         except GuardrailViolation as violation:  # the backend's own rules are stricter
             return ToolOutcome.held(GUARDRAIL_GATE, apply_guardrail_message(violation.violations))
+        except ConsequenceHeld as held:
+            reasons = ", ".join(held.receipt.reason_codes) or "no reason code"
+            return ToolOutcome(
+                f"VALO {held.decision.value} held {change_id}: {reasons}. "
+                f"Receipt {held.receipt.receipt_id}.",
+                [AgentEvent(type="governance_receipt", data=_record(held.receipt))],
+                blocked=CONSEQUENCE_GATE,
+            )
+        receipt = result.receipt if isinstance(result, ConsequenceResult) else None
+        applied = result.applied_change if isinstance(result, ConsequenceResult) else result
         self._state.remember_change(applied)
+        events = [AgentEvent.change_update(_record(applied))]
+        if receipt is not None:
+            events.append(AgentEvent(type="governance_receipt", data=_record(receipt)))
         return ToolOutcome(
             applied_confirmation(change_id, applied.kind.value, self._session.operator),
-            [AgentEvent.change_update(_record(applied))],
+            events,
         )
 
     async def _discard_change(self, tool_input: dict[str, Any]) -> ToolOutcome:

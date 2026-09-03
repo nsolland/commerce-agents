@@ -17,6 +17,7 @@ produces. Hosts render the event types below and ignore any they do not know.
                     generated; the final ``ui`` event carries the same ``stream_id``.
 ``cart_update``     ``{"cart"}``: the whole cart.
 ``change_update``   ``{"change"}``: a staged change's whole record after it moved.
+``governance_receipt`` A consequence-time decision and effect evidence receipt.
 ``progress``        ``{"message"[, "tool", "step"]}``: a status line to replace the
                     previous one and clear on that tool's ``tool_result``.
 ``turn_complete``   ``{"stop_reason", "usage", "elapsed_ms", "results_cleared"}``: ``usage``
@@ -44,6 +45,7 @@ EventType = Literal[
     "ui_partial",
     "cart_update",
     "change_update",
+    "governance_receipt",
     "progress",
     "turn_complete",
     "error",
