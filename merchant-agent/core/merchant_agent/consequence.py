@@ -1,4 +1,4 @@
-# Copyright 2026 Anthropic PBC
+# Copyright 2026 VALO Research
 # SPDX-License-Identifier: Apache-2.0
 
 """Optional consequence boundary for merchant writes.
