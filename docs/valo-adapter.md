@@ -47,6 +47,8 @@ policy internals to the model.
 
 Run the local demonstrator:
 
+[Open the live interactive demo](https://valo-consequence-demo.njaal-solland.chatgpt.site)
+
 ```bash
 python scripts/demo_valo_consequence.py
 ```
