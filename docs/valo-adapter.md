@@ -44,3 +44,14 @@ An allowed result carries the applied `StagedChange` and a `ConsequenceReceipt`.
 executor emits both `change_update` and `governance_receipt` host events. A held result
 names the VALO decision, reason codes, and receipt id without exposing credentials or
 policy internals to the model.
+
+Run the local demonstrator:
+
+```bash
+python scripts/demo_valo_consequence.py
+```
+
+It executes one allowed consequence, then proves that changed resource state and
+revoked authority each fail closed without adding another effect. The in-process demo
+gateway exists only to make the boundary observable; it is not a VALO kernel
+implementation.
