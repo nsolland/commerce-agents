@@ -11,6 +11,22 @@ from .analysis import check_analysis_sql
 from .backend import MerchantBackend
 from .changes import ChangeLedger, ChangeNotApplicable, GuardrailViolation
 from .config import MerchantAgentConfig
+from .consequence import (
+    CONSEQUENCE_GATE,
+    ApprovalEvidence,
+    AuthorityReferences,
+    ConsequenceContext,
+    ConsequenceDecision,
+    ConsequenceGateway,
+    ConsequenceHeld,
+    ConsequenceReceipt,
+    ConsequenceRequest,
+    ConsequenceResult,
+    DirectMerchantConsequenceAdapter,
+    MerchantConsequenceAdapter,
+    ValoConsequenceAdapter,
+    staged_change_digest,
+)
 from .types import (
     ActorKind,
     AlertCounts,
@@ -41,12 +57,15 @@ from .types import (
 )
 
 __all__ = [
+    "CONSEQUENCE_GATE",
+    "ApprovalEvidence",
     "ActorKind",
     "AlertCounts",
     "AnalysisFigure",
     "AnalysisResult",
     "AnalysisTable",
     "BusinessSnapshot",
+    "AuthorityReferences",
     "Campaign",
     "CampaignDraft",
     "ChangeItem",
@@ -54,7 +73,15 @@ __all__ = [
     "ChangeLedger",
     "ChangeNotApplicable",
     "ChangeStatus",
+    "ConsequenceContext",
+    "ConsequenceDecision",
+    "ConsequenceGateway",
+    "ConsequenceHeld",
+    "ConsequenceReceipt",
+    "ConsequenceRequest",
+    "ConsequenceResult",
     "DataLimitation",
+    "DirectMerchantConsequenceAdapter",
     "GuardrailViolation",
     "InventoryActionItem",
     "InventoryAlert",
@@ -63,6 +90,7 @@ __all__ = [
     "ListingFilters",
     "MerchantAgentConfig",
     "MerchantBackend",
+    "MerchantConsequenceAdapter",
     "MerchantSessionContext",
     "MerchantSessionState",
     "MetricPoint",
@@ -72,5 +100,7 @@ __all__ = [
     "PricingContext",
     "PromotionDraft",
     "StagedChange",
+    "ValoConsequenceAdapter",
+    "staged_change_digest",
     "check_analysis_sql",
 ]

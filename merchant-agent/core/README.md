@@ -16,6 +16,7 @@ variants and what to return for a figure the platform cannot supply.
 | `tools/presentation.py` | Payload schemas for the three built-in presentation tools (chips are in `commerce_common`) |
 | `enrichment.py` | Metric picks resolved to session values, digest items joined to records, the preview built from the staged record; partial payloads while streaming |
 | `changes.py` | `check_guardrails`, run at staging and again at apply, and the in-memory `ChangeLedger` |
+| `consequence.py` | Optional VALO adapter: authority references and approval evidence enter one governed effect commit; `DENY` and `ESCALATE` fail closed and `ALLOW` returns a receipt |
 | `gates.py` | Listing and campaign provenance, the options hold (a family listing is priced and restocked per variant), the apply and discard gates, the follow-through reminder text |
 | `grounding.py` | The metrics and queue grounding rules and the `change_requested` detector |
 | `serialization.py` | Tool-result payloads: search header, listing record with variant rows, pricing context, alerts |

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VALO Consequence Boundary</title>
+  <meta name="description" content="See what changes when authority and reality are resolved at the final consequence boundary.">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070a0c;
+      --panel: #0d1216;
+      --panel-2: #11181d;
+      --line: #243038;
+      --line-soft: #182127;
+      --text: #eef5f2;
+      --muted: #8fa09a;
+      --cyan: #75f4cf;
+      --cyan-deep: #143c34;
+      --amber: #ffbd66;
+      --red: #ff7770;
+      --red-deep: #3a191b;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 75% -10%, rgba(71, 242, 194, .10), transparent 32rem),
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
+        var(--bg);
+      background-size: auto, 40px 40px, 40px 40px, auto;
+      color: var(--text);
+      font-family: var(--sans);
+    }
+    button { font: inherit; }
+    .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 34px 0 56px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .mark {
+      width: 34px; height: 34px; display: grid; place-items: center;
+      border: 1px solid #4a7468; border-radius: 50%; color: var(--cyan);
+      font: 700 13px var(--mono); box-shadow: inset 0 0 0 5px rgba(117,244,207,.04);
+    }
+    .brand strong { display: block; letter-spacing: .08em; font-size: 14px; }
+    .brand span { display: block; margin-top: 2px; color: var(--muted); font: 12px var(--mono); }
+    .repo { color: var(--muted); text-decoration: none; font: 13px var(--mono); border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+    .repo:hover { color: var(--text); border-color: var(--cyan); }
+    .intro { max-width: 810px; margin-bottom: 32px; }
+    .eyebrow { color: var(--cyan); font: 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; margin: 0 0 13px; }
+    h1 { margin: 0; font-size: clamp(34px, 6vw, 72px); line-height: .98; letter-spacing: -.052em; max-width: 850px; font-weight: 650; }
+    .intro > p:last-child { color: #b6c4bf; max-width: 700px; font-size: 18px; line-height: 1.58; margin: 22px 0 0; }
+    .boundary { margin: 36px 0; display: grid; grid-template-columns: repeat(7, 1fr); align-items: stretch; }
+    .node { position: relative; min-height: 100px; padding: 17px 13px; border: 1px solid var(--line); border-right: 0; background: rgba(13,18,22,.78); }
+    .node:first-child { border-radius: 12px 0 0 12px; }
+    .node:last-child { border-right: 1px solid var(--line); border-radius: 0 12px 12px 0; }
+    .node small { display: block; color: var(--muted); font: 11px var(--mono); margin-bottom: 18px; }
+    .node span { font-size: 14px; line-height: 1.3; }
+    .node.active { background: linear-gradient(150deg, rgba(117,244,207,.16), rgba(13,18,22,.9)); border-color: #4b8c7a; }
+    .node.active + .node { border-left-color: #4b8c7a; }
+    .node.active small, .node.active span { color: var(--cyan); }
+    .workbench { display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: rgba(9,13,16,.92); box-shadow: 0 26px 80px rgba(0,0,0,.34); }
+    .controls { padding: 28px; border-right: 1px solid var(--line); }
+    .panel-title { margin: 0; font: 12px var(--mono); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+    .change { margin: 21px 0 25px; padding: 18px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--line-soft); }
+    .change-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .change-id { font: 12px var(--mono); color: var(--muted); }
+    .staged { color: var(--amber); font: 11px var(--mono); text-transform: uppercase; letter-spacing: .08em; }
+    .price { display: flex; align-items: baseline; gap: 11px; margin-top: 20px; }
+    .price strong { font: 30px var(--mono); }
+    .price s { color: var(--muted); font: 16px var(--mono); }
+    .price em { color: var(--cyan); font: normal 12px var(--mono); }
+    .scenario-list { display: grid; gap: 10px; margin-top: 15px; }
+    .scenario {
+      width: 100%; text-align: left; padding: 15px 16px; border: 1px solid var(--line);
+      border-radius: 9px; background: transparent; color: var(--text); cursor: pointer;
+      transition: border-color .18s, background .18s, transform .18s;
+    }
+    .scenario:hover { border-color: #456158; background: rgba(255,255,255,.025); transform: translateY(-1px); }
+    .scenario:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+    .scenario b { display: block; font-size: 15px; font-weight: 600; }
+    .scenario span { display: block; color: var(--muted); font-size: 13px; margin-top: 5px; line-height: 1.4; }
+    .result { padding: 28px; min-height: 470px; display: flex; flex-direction: column; }
+    .status-line { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 23px; border-bottom: 1px solid var(--line); }
+    .decision { font: 600 clamp(32px, 5vw, 58px) var(--mono); letter-spacing: -.055em; }
+    .decision.idle { color: #53625d; }
+    .decision.allow { color: var(--cyan); text-shadow: 0 0 28px rgba(117,244,207,.2); }
+    .decision.deny { color: var(--red); text-shadow: 0 0 28px rgba(255,119,112,.18); }
+    .effect { font: 12px var(--mono); color: var(--muted); text-align: right; }
+    .effect strong { display: block; margin-top: 5px; color: var(--text); font-size: 14px; }
+    .effect strong.committed { color: var(--cyan); }
+    .effect strong.blocked { color: var(--red); }
+    .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 20px 0; }
+    .check { padding: 13px; border: 1px solid var(--line-soft); background: var(--panel); border-radius: 8px; }
+    .check label { color: var(--muted); font: 11px var(--mono); }
+    .check strong { display: block; margin-top: 8px; font: 13px var(--mono); color: #5e6e68; }
+    .check strong.pass { color: var(--cyan); }
+    .check strong.fail { color: var(--red); }
+    .receipt { flex: 1; background: #080c0f; border: 1px solid var(--line-soft); border-radius: 10px; padding: 17px; overflow: auto; }
+    .receipt-head { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 13px; color: var(--muted); font: 11px var(--mono); text-transform: uppercase; letter-spacing: .09em; }
+    pre { margin: 0; white-space: pre-wrap; word-break: break-word; color: #a8b9b3; font: 12px/1.72 var(--mono); }
+    .key { color: #77928a; }
+    .value { color: #d6e3df; }
+    .good { color: var(--cyan); }
+    .bad { color: var(--red); }
+    .foot { display: flex; justify-content: space-between; gap: 24px; margin-top: 22px; color: var(--muted); font: 12px/1.6 var(--mono); }
+    .foot p { margin: 0; max-width: 620px; }
+    @media (max-width: 850px) {
+      .boundary { grid-template-columns: repeat(4, 1fr); }
+      .node:nth-child(4) { border-right: 1px solid var(--line); border-radius: 0 12px 12px 0; }
+      .node:nth-child(5) { border-radius: 12px 0 0 12px; }
+      .node { min-height: 86px; }
+      .workbench { grid-template-columns: 1fr; }
+      .controls { border-right: 0; border-bottom: 1px solid var(--line); }
+    }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 20px, 1180px); padding-top: 20px; }
+      header { align-items: flex-start; }
+      .repo { font-size: 0; }
+      .repo::after { content: "GitHub ↗"; font-size: 12px; }
+      .intro > p:last-child { font-size: 16px; }
+      .boundary { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+      .node, .node:first-child, .node:last-child, .node:nth-child(4), .node:nth-child(5) { border: 1px solid var(--line); border-radius: 8px; }
+      .controls, .result { padding: 20px; }
+      .checks { grid-template-columns: 1fr; }
+      .status-line { align-items: flex-end; }
+      .foot { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><div class="mark">V</div><div><strong>VALO RESEARCH</strong><span>Consequence boundary / v1</span></div></div>
+      <a class="repo" href="https://github.com/nsolland/commerce-agents/pull/1" target="_blank" rel="noreferrer">Reference adapter ↗</a>
+    </header>
+
+    <section class="intro">
+      <p class="eyebrow">Interactive reference demonstration</p>
+      <h1>Approval is not the final authority.</h1>
+      <p>A staged action is checked again where intention becomes consequence. Change the condition below and watch the same approved action produce a different governed outcome.</p>
+    </section>
+
+    <section class="boundary" aria-label="Governed effect path">
+      <div class="node"><small>01</small><span>Agent proposal</span></div>
+      <div class="node"><small>02</small><span>Staged change</span></div>
+      <div class="node"><small>03</small><span>Human approval</span></div>
+      <div class="node active"><small>04</small><span>Fresh authority</span></div>
+      <div class="node active"><small>05</small><span>Fresh reality</span></div>
+      <div class="node active"><small>06</small><span>Admissibility</span></div>
+      <div class="node"><small>07</small><span>Effect + receipt</span></div>
+    </section>
+
+    <section class="workbench">
+      <div class="controls">
+        <p class="panel-title">Approved change</p>
+        <div class="change">
+          <div class="change-top"><span class="change-id">chg-price-0042</span><span class="staged">approved</span></div>
+          <div class="price"><s>$100</s><strong>$110</strong><em>+10%</em></div>
+        </div>
+        <p class="panel-title">Consequence-time condition</p>
+        <div class="scenario-list">
+          <button class="scenario" data-case="allow"><b>Authority and reality are current</b><span>The mandate remains operative and the listing is still version v7.</span></button>
+          <button class="scenario" data-case="stale"><b>Reality changed after approval</b><span>Another system changed the listing from v7 to v9.</span></button>
+          <button class="scenario" data-case="revoked"><b>Authority was revoked</b><span>The operator’s mandate ended after the action was approved.</span></button>
+        </div>
+      </div>
+
+      <div class="result" aria-live="polite">
+        <div class="status-line">
+          <div id="decision" class="decision idle">READY</div>
+          <div class="effect">Live effect<strong id="effect">Not attempted</strong></div>
+        </div>
+        <div class="checks">
+          <div class="check"><label>AUTHORITY</label><strong id="authority">—</strong></div>
+          <div class="check"><label>RESOURCE STATE</label><strong id="resource">—</strong></div>
+          <div class="check"><label>ADMISSIBILITY</label><strong id="admissibility">—</strong></div>
+        </div>
+        <div class="receipt">
+          <div class="receipt-head"><span>Verifiable receipt</span><span id="receiptId">No receipt</span></div>
+          <pre id="receipt">Select a consequence-time condition.</pre>
+        </div>
+      </div>
+    </section>
+
+    <div class="foot">
+      <p>Anthropic’s agent path is preserved through staging and approval. The adapter replaces the final backend write with one governed consequence commit.</p>
+      <p>Demo only · No live commerce system</p>
+    </div>
+  </main>
+
+  <script>
+    const cases = {
+      allow: { decision: "ALLOW", authority: "OPERATIVE", resource: "CURRENT / v7", admissibility: "ADMISSIBLE", effect: "COMMITTED", reasons: [] },
+      stale: { decision: "DENY", authority: "OPERATIVE", resource: "CHANGED / v9", admissibility: "PRECLUDED", effect: "NO EFFECT", reasons: ["RESOURCE_STATE_CHANGED"] },
+      revoked: { decision: "DENY", authority: "REVOKED", resource: "CURRENT / v7", admissibility: "PRECLUDED", effect: "NO EFFECT", reasons: ["AUTHORITY_REVOKED"] }
+    };
+    let sequence = 0;
+    const shortDigest = input => {
+      let h = 2166136261;
+      for (const c of input) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+      return (h >>> 0).toString(16).padStart(8, "0").repeat(4);
+    };
+    const paint = (id, value, state) => {
+      const el = document.getElementById(id);
+      el.textContent = value;
+      el.className = state || "";
+    };
+    document.querySelectorAll(".scenario").forEach(button => button.addEventListener("click", () => {
+      const key = button.dataset.case;
+      const item = cases[key];
+      sequence += 1;
+      const id = `valo-receipt-${String(sequence).padStart(4, "0")}`;
+      paint("decision", item.decision, `decision ${item.decision.toLowerCase()}`);
+      paint("effect", item.effect, item.decision === "ALLOW" ? "committed" : "blocked");
+      paint("authority", item.authority, item.authority === "OPERATIVE" ? "pass" : "fail");
+      paint("resource", item.resource, key === "stale" ? "fail" : "pass");
+      paint("admissibility", item.admissibility, item.decision === "ALLOW" ? "pass" : "fail");
+      document.getElementById("receiptId").textContent = id;
+      const receipt = {
+        receipt_id: id,
+        decision: item.decision,
+        reason_codes: item.reasons,
+        authority_state_digest: shortDigest(`authority:${key}`),
+        resource_state_digest: shortDigest(`resource:${key}`),
+        policy_state_digest: shortDigest("policy:merchant-v1"),
+        effect_digest: item.decision === "ALLOW" ? shortDigest("chg-price-0042:$110") : null,
+        replay_reference: `demo-replay:${id}`
+      };
+      const highlighted = JSON.stringify(receipt, null, 2)
+        .replace(/"([^"\n]+)":/g, '<span class="key">"$1"</span>:')
+        .replace(/: "([^"\n]+)"/g, ': <span class="value">"$1"</span>')
+        .replace(/"ALLOW"/g, '<span class="good">"ALLOW"</span>')
+        .replace(/"DENY"/g, '<span class="bad">"DENY"</span>');
+      document.getElementById("receipt").innerHTML = highlighted;
+    }));
+  </script>
+</body>
+</html>
+
